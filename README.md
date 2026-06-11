@@ -43,17 +43,22 @@ docker compose up -d
 ### 2. Configure Environment Settings
 Copy the `.env.example` template file into a new file named `.env` in both the workspace root and the `backend` folder. Fill in your corresponding IDE keys, database values, and API credentials:
 ```bash
+```bash
 copy .env.example .env
+# Optionally create a backend‑specific .env (useful when running commands from the backend folder)
 copy .env.example backend\.env
+```
 ```
 
 ### 3. Setup Python Backend Environment
 Create a dedicated virtual environment in the `backend` directory, activate it, and install python dependencies:
 ```bash
+```bash
 cd backend
 python -m venv venv
-.\venv\Scripts\activate
+.\\venv\\Scripts\\activate
 pip install -r requirements.txt
+```
 ```
 
 ### 4. Apply Database Schema & Seed Data
@@ -89,6 +94,20 @@ Open four shell sessions or terminals to run the system processes concurrently:
 ## 📝 Documented local instructions PDF
 A formatted PDF copy containing local environment setup checklists, database connection details, and commands is available at:
 `[QuotaLens_Local_Instructions.pdf](file:///d:/Projects/QuotaLens/QuotaLens_Local_Instructions.pdf)`
+
+## 🧪 Running Tests
+
+The backend includes a test suite using **pytest**. Ensure the Docker containers (PostgreSQL & Redis) are running, then execute:
+
+```bash
+cd backend
+.\\venv\\Scripts\\activate
+pytest -q
+```
+
+## 📄 Local Instructions
+
+For a concise step‑by‑step guide, see the `LOCAL_INSTRUCTIONS.md` file in the repository root.
 
 ## 🛡️ License
 Private — Personal Use Only.
