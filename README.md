@@ -33,7 +33,7 @@
 ## 🚀 Quick Start Guide
 
 ### 1. Fire up Infrastructure (Docker)
-Ensure Docker Desktop is running on your workstation. Run the following command from the project root to spin up containerized instances of **PostgreSQL 16** and **Redis 7**. 
+Ensure Docker Desktop is running on your workstation. Run the following command from the project root to spin up containerized instances of **PostgreSQL 16** and **Redis 7**.
 
 *Note: PostgreSQL host port is mapped to `5433` to prevent collisions with any native PostgreSQL servers running on the host on `5432`.*
 ```bash
@@ -41,36 +41,39 @@ docker compose up -d
 ```
 
 ### 2. Configure Environment Settings
-Copy the `.env.example` template file into a new file named `.env` in both the workspace root and the `backend` folder. Fill in your corresponding IDE keys, database values, and API credentials:
-```bash
+Copy the `.env.example` template file into a new file named `.env` in the workspace root and (optionally) the `backend` folder, then fill in required keys:
 ```bash
 copy .env.example .env
-# Optionally create a backend‑specific .env (useful when running commands from the backend folder)
+# Optionally:
 copy .env.example backend\.env
 ```
-```
 
-### 3. Setup Python Backend Environment
-Create a dedicated virtual environment in the `backend` directory, activate it, and install python dependencies:
-```bash
+### 3. Setup Python Backend
+Install server dependencies (system Python) or use Docker (see `LOCAL_INSTRUCTIONS.md`):
 ```bash
 cd backend
-python -m venv venv
-.\\venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
+
+### 4. Apply Database Schema
+Apply database migrations (recommended) or start the backend which will create tables automatically. QuotaLens will not populate demo/fake data unless you explicitly run the seed script — do not run `seed.py` if you want an empty database.
+
+Recommended (migrations):
+```bash
+cd backend
+alembic upgrade head
 ```
 
-### 4. Apply Database Schema & Seed Data
-Initialize all PostgreSQL database tables and populate them with 30 days of realistic usage records and configs:
+Or start the backend (development):
 ```bash
-python seed.py
+cd backend
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 ### 5. Setup React Frontend Client
 Navigate to the `frontend` folder, install package dependencies, and spin up the development compiler:
 ```bash
-cd ../frontend
+cd frontend
 npm install
 npm run dev
 ```

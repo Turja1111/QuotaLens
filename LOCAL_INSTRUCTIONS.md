@@ -23,6 +23,7 @@ Verify the containers are healthy:
 docker ps
 ```
 You should see `quotalens_postgres` and `quotalens_redis` with status `healthy`.
+Note: Redis is mapped to host port `6380` (container port `6379`) to avoid conflicts with other services on port `6379`.
 
 ## 3. Configure Environment Variables
 ```bash
@@ -31,6 +32,17 @@ copy .env.example .env
 copy .env.example backend\.env
 ```
 Edit the `.env` (and `backend\.env` if created) and fill in any required API keys, passwords, and secrets.
+
+When running with Docker Compose, update the database and Redis hosts so containers talk to the service names on the Docker network. In `.env` set:
+
+```text
+# inside .env (for Docker)
+DATABASE_URL=postgresql+asyncpg://quotalens:password@postgres:5432/model_quota
+DATABASE_URL_SYNC=postgresql://quotalens:password@postgres:5432/model_quota
+REDIS_URL=redis://redis:6379/0
+```
+
+Do NOT leave `localhost` in these URLs when running services in Docker — use the service names `postgres` and `redis` so containers can reach each other.
 
 ## 4. Set Up the Python Backend (no virtualenv)
 
@@ -78,28 +90,37 @@ After adding these services run:
 docker compose up -d --build
 ```
 
-### Initialise the Database
+### Initialise the Database Schema
+Apply Alembic migrations (recommended) or start the backend which will create tables automatically. **Do not run `seed.py`** if you do not want demo/fake data — the project will not populate demo data unless the seed script is explicitly executed.
+
+Recommended (migrations):
 ```bash
-python seed.py
+cd backend
+alembic upgrade head
 ```
-This will create the tables. (If you prefer an empty database, you can skip running `seed.py`.)
+
+Or start the backend (development) to let the app create tables:
+```bash
+cd backend
+uvicorn main:app --host 127.0.0.1 --port 8000
+```
 
 ## 5. Run Backend Services
 Open separate terminal windows (or use a terminal multiplexer) for each command.
 ### FastAPI Server
 ```bash
 cd backend
-.\\venv\\Scripts\\uvicorn main:app --host 127.0.0.1 --port 8000
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 ### Celery Worker
 ```bash
 cd backend
-.\\venv\\Scripts\\celery -A scheduler.celery_app worker --loglevel=info
+celery -A scheduler.celery_app worker --loglevel=info
 ```
 ### Celery Beat (Scheduler)
 ```bash
 cd backend
-.\\venv\\Scripts\\celery -A scheduler.celery_app beat --loglevel=info
+celery -A scheduler.celery_app beat --loglevel=info
 ```
 The API docs are available at `http://localhost:8000/docs` and the admin panel at `http://localhost:8000/admin`.
 
@@ -112,10 +133,9 @@ npm run dev
 The frontend will be served at `http://localhost:5173`.
 
 ## 7. Running Tests (Optional)
-Make sure the Docker containers are running, then:
+Make sure the Docker containers are running (Postgres/Redis) or that your database settings point to a running service, then run tests from the `backend` folder:
 ```bash
 cd backend
-.\\venv\\Scripts\\activate
 pytest -q
 ```
 All tests should pass.

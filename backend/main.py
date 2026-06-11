@@ -11,8 +11,7 @@ from sqladmin import Admin
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 
-from database import engine, sync_engine
-from models import Base
+from database import sync_engine
 from admin_views import (
     AccountAdmin,
     UsageRecordAdmin,
@@ -22,7 +21,7 @@ from admin_views import (
 )
 from api import dashboard, quota, usage, accounts, alerts, data as data_api
 # Import the WebSocket router using a relative import to avoid ModuleNotFoundError
-from .websocket.quota_stream import router as ws_router
+from websocket.quota_stream import router as ws_router
 from config import settings
 
 
@@ -50,9 +49,6 @@ class AdminAuth(AuthenticationBackend):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create tables on startup (for dev; use Alembic migrations in production)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
 
 

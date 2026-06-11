@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     )
 
     # ── Database & Queue ─────────────────────────────────────────────────
-    database_url: str = "postgresql+asyncpg://quotalens:password@localhost:5432/model_quota"
-    database_url_sync: str = "postgresql://quotalens:password@localhost:5432/model_quota"
+    database_url: str = "postgresql+asyncpg://postgres:Admin@localhost:5432/?database=Model%20Quota"
+    database_url_sync: str = "postgresql://postgres:Admin@localhost:5432/?dbname=Model%20Quota"
     redis_url: str = "redis://localhost:6379/0"
 
     # ── Security ─────────────────────────────────────────────────────────

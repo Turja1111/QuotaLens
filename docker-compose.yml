@@ -1,29 +1,9 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16
-    container_name: quotalens_postgres
-    environment:
-      POSTGRES_DB: model_quota
-      POSTGRES_USER: quotalens
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5433:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quotalens -d model_quota"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   redis:
     image: redis:7
     container_name: quotalens_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redisdata:/data
     healthcheck:
@@ -33,6 +13,75 @@ services:
       retries: 5
     restart: unless-stopped
 
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: quotalens_backend
+    env_file:
+      - ./.env
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:Admin@host.docker.internal:5432/?database=Model%20Quota
+      DATABASE_URL_SYNC: postgresql://postgres:Admin@host.docker.internal:5432/?dbname=Model%20Quota
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: quotalens_celery_worker
+    env_file:
+      - ./.env
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:Admin@host.docker.internal:5432/?database=Model%20Quota
+      DATABASE_URL_SYNC: postgresql://postgres:Admin@host.docker.internal:5432/?dbname=Model%20Quota
+      REDIS_URL: redis://redis:6379/0
+    command: celery -A scheduler.celery_app worker --loglevel=info
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: quotalens_celery_beat
+    env_file:
+      - ./.env
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:Admin@host.docker.internal:5432/?database=Model%20Quota
+      DATABASE_URL_SYNC: postgresql://postgres:Admin@host.docker.internal:5432/?dbname=Model%20Quota
+      REDIS_URL: redis://redis:6379/0
+    command: celery -A scheduler.celery_app beat --loglevel=info
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: quotalens_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
-  pgdata:
   redisdata:
