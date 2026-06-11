@@ -32,18 +32,57 @@ copy .env.example backend\.env
 ```
 Edit the `.env` (and `backend\.env` if created) and fill in any required API keys, passwords, and secrets.
 
-## 4. Set Up the Python Backend
+## 4. Set Up the Python Backend (no virtualenv)
+
+You can run the backend without creating a virtual environment. Choose one of the two options below.
+
+Option A — Install dependencies into your system Python (or any active environment):
 ```bash
 cd backend
-python -m venv venv
-.\\venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
-### Initialise the Database & Seed Demo Data
+
+Option B — Run the backend in Docker (recommended if you prefer containerised services). Example `docker-compose` services you can add to `docker-compose.yml`:
+
+```yaml
+	backend:
+		image: python:3.11-slim
+		container_name: quotalens_backend
+		working_dir: /app
+		volumes:
+			- ./backend:/app:cached
+			- ./backend/.env:/app/.env:ro
+		command: bash -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000"
+		ports:
+			- "8000:8000"
+		depends_on:
+			- postgres
+			- redis
+
+	frontend:
+		image: node:20-slim
+		container_name: quotalens_frontend
+		working_dir: /app
+		volumes:
+			- ./frontend:/app:cached
+		command: bash -c "npm install && npm run dev -- --host 0.0.0.0"
+		ports:
+			- "5173:5173"
+		depends_on:
+			- backend
+```
+
+After adding these services run:
+
+```bash
+docker compose up -d --build
+```
+
+### Initialise the Database
 ```bash
 python seed.py
 ```
-This will create the tables and populate them with realistic demo data.
+This will create the tables. (If you prefer an empty database, you can skip running `seed.py`.)
 
 ## 5. Run Backend Services
 Open separate terminal windows (or use a terminal multiplexer) for each command.

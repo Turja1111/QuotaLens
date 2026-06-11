@@ -21,7 +21,8 @@ from admin_views import (
     GeminiQuotaConfigAdmin,
 )
 from api import dashboard, quota, usage, accounts, alerts, data as data_api
-from websocket.quota_stream import router as ws_router
+# Import the WebSocket router using a relative import to avoid ModuleNotFoundError
+from .websocket.quota_stream import router as ws_router
 from config import settings
 
 
