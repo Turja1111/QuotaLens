@@ -26,7 +26,10 @@ export function Dashboard() {
   }
 
   const accounts = apiData?.accounts || []
-  const today = apiData?.today || { requests: 0, input_tokens: 0, output_tokens: 0, cost_usd: 0 }
+  const today = apiData?.today || {}
+  const todayRequests = today.requests ?? 0
+  const todayInputTokens = today.input_tokens ?? 0
+  const todayOutputTokens = today.output_tokens ?? 0
 
   // Filter accounts by active slot
   const filteredAccounts = accounts.filter((acc: any) => {
@@ -132,16 +135,16 @@ export function Dashboard() {
       <div className="stats-strip">
         <div className="stat-card purple">
           <span className="stat-label">Requests Today</span>
-          <span className="stat-value">{today.requests.toLocaleString()}</span>
+          <span className="stat-value">{(Number(todayRequests) || 0).toLocaleString()}</span>
           <span className="stat-detail">Across all tools & accounts</span>
         </div>
         <div className="stat-card blue">
           <span className="stat-label">Tokens Today</span>
           <span className="stat-value">
-            {Math.round((today.input_tokens + today.output_tokens) / 1000).toLocaleString()}k
+            {Math.round(((Number(todayInputTokens) || 0) + (Number(todayOutputTokens) || 0)) / 1000).toLocaleString()}k
           </span>
           <span className="stat-detail">
-            {Math.round(today.input_tokens / 1000).toLocaleString()}k in / {Math.round(today.output_tokens / 1000).toLocaleString()}k out
+            {Math.round((Number(todayInputTokens) || 0) / 1000).toLocaleString()}k in / {Math.round((Number(todayOutputTokens) || 0) / 1000).toLocaleString()}k out
           </span>
         </div>
         <div className="stat-card red">

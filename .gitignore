@@ -1,0 +1,86 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.docker/
+
+# Node modules (frontend)
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Migrations - keep but ignore generated files
+migrations/versions/*.py
+!migrations/versions/001_initial_schema.py
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
